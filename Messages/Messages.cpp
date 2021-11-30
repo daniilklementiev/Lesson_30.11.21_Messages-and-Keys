@@ -14,6 +14,8 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+HWND static1;
+HWND list;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -39,7 +41,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MESSAGES));
 
     MSG msg;
-
+    
     // Main message loop:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
@@ -73,7 +75,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MESSAGES));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+2);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_MESSAGES);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -123,6 +125,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CREATE:
+        static1 = CreateWindowW(L"Static", L"0", WS_CHILD | WS_VISIBLE | SS_CENTER, 10, 10, 50, 15, hWnd, 0, hInst, 0);
+        list = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 10, 40, 200, 500, hWnd, 0, hInst, 0);
+        break;
+    case WM_KEYDOWN:
+    {
+        WCHAR str[100];
+        _snwprintf_s(str, 100, L"%d %u", wParam, (lParam >> 16)&255);
+        SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)str);
+        SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        SendMessageW(static1, WM_SETTEXT, 100, (LPARAM)str);
+        break;
+    }
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
