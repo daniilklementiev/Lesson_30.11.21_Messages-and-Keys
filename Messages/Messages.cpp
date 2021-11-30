@@ -16,6 +16,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 HWND static1;
 HWND list;
+HWND list2;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -128,14 +129,48 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         static1 = CreateWindowW(L"Static", L"0", WS_CHILD | WS_VISIBLE | SS_CENTER, 10, 10, 50, 15, hWnd, 0, hInst, 0);
         list = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 10, 40, 200, 500, hWnd, 0, hInst, 0);
+        list2 = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 240, 40, 200, 500, hWnd, 0, hInst, 0);
         break;
     case WM_KEYDOWN:
     {
         WCHAR str[100];
-        _snwprintf_s(str, 100, L"%d %u", wParam, (lParam >> 16)&255);
-        SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)str);
-        SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
-        SendMessageW(static1, WM_SETTEXT, 100, (LPARAM)str);
+        
+        if (wParam == 17)
+        {
+            _snwprintf_s(str, 100, L"Right ctrl : %d %u", wParam, (lParam >> 24) & 255);
+            SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        }
+        else if (wParam == 93)
+        {
+            _snwprintf_s(str, 100, L"Right alt : %d %u", wParam, (lParam >> 24) & 255);
+            SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        }
+        else {
+            _snwprintf_s(str, 100, L"Key down : %d %u", wParam, (lParam >> 16) & 255);
+            SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)str);
+            SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        }
+        break;
+    }
+    case WM_KEYUP:
+    {
+        WCHAR str[100];
+        if (wParam == 17)
+        {
+            _snwprintf_s(str, 100, L"Right ctrl : %d %u", wParam, (lParam >> 24) & 255);
+            SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        }
+        else if (wParam == 93)
+        {
+            _snwprintf_s(str, 100, L"Right alt : %d %u", wParam, (lParam >> 24) & 255);
+            SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        }
+        else {
+            _snwprintf_s(str, 100, L"Key up: %d %u", wParam, (lParam >> 16) & 255);
+            SendMessageW(list2, LB_ADDSTRING, 100, (LPARAM)str);
+            SendMessageW(list2, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
+        }
+        break;
         break;
     }
 
