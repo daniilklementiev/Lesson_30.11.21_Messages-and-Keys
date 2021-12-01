@@ -159,10 +159,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         break;
     }
+    case WM_MBUTTONDOWN: {
+        KillTimer(hWnd, TIMER_ANTICLICK);
+        break;
+    }
     case WM_KEYDOWN:
     {
-        
-        
+
         if (wParam == 17)
         {
             _snwprintf_s(str, 100, L"Right ctrl : %d %u", wParam, (lParam >> 24) & 255);
@@ -189,11 +192,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SendMessageW(static2, WM_SETTEXT, 100, (LPARAM)str);
         break;
     }
+
     case WM_LBUTTONDOWN:{
         click_count += 1;
         _itow_s(click_count, str, 10);
         SendMessageW(static3, WM_SETTEXT, 100, (LPARAM)str);
-        
+        SetTimer(hWnd, TIMER_ANTICLICK, 1000, NULL);
         break;
     }
     case WM_RBUTTONDOWN: {
@@ -204,11 +208,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_LBUTTONUP: {
         SendMessageW(progress, PBM_STEPIT, 0, 0);
+
         break;
     }
     case WM_RBUTTONUP:
         SendMessageW(progress, PBM_DELTAPOS, -1, 0);
         break;
+
+
     /*case WM_KEYUP:
     {
         WCHAR str[100];
