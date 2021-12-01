@@ -1,9 +1,13 @@
 // Messages.cpp : 
 #include "framework.h"
 #include "Messages.h"
+#include "windowsx.h"
+#include <CommCtrl.h>
 
-#define MAX_LOADSTRING 100
-
+#define MAX_LOADSTRING        100
+#define TIMER_ANTICLICK       2000
+#define TIMER_ANTICLICK       2000
+typedef int count;
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -15,8 +19,15 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 HWND static1;
+HWND static2;
+HWND static3;
 HWND list;
 HWND list2;
+HWND progress;
+WCHAR str[100];
+
+count click_count = 0;
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -128,12 +139,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         static1 = CreateWindowW(L"Static", L"0", WS_CHILD | WS_VISIBLE | SS_CENTER, 10, 10, 50, 15, hWnd, 0, hInst, 0);
-        list = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 10, 40, 200, 500, hWnd, 0, hInst, 0);
-        list2 = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 240, 40, 200, 500, hWnd, 0, hInst, 0);
+        static2 = CreateWindowW(L"Static", L"0", WS_CHILD | WS_VISIBLE | SS_CENTER, 70, 10, 150, 15, hWnd, 0, hInst, 0);
+        static3 = CreateWindowW(L"Static", L"0", WS_CHILD | WS_VISIBLE | SS_CENTER, 240, 10, 50, 15, hWnd, 0, hInst, 0);
+        progress = CreateWindowW(PROGRESS_CLASSW, L"", WS_CHILD | WS_VISIBLE | PBS_SMOOTH | WS_BORDER,
+            10, 70, 150, 20, hWnd, 0, hInst, NULL);
+        SendMessageW(progress, PBM_SETRANGE, 0, MAKELPARAM(0,100));
+        SendMessageW(progress, PBM_SETSTEP, 1, 0);
+        SendMessageW(progress, PBM_SETBARCOLOR, 0, RGB(100, 200, 100));
+        SendMessageW(progress, PBM_DELTAPOS, 50, 0);
+        SetTimer(hWnd, TIMER_ANTICLICK, 1000, NULL);
+        
+        /*list = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 10, 40, 200, 500, hWnd, 0, hInst, 0);
+        list2 = CreateWindowW(L"Listbox", L" ", WS_CHILD | WS_VISIBLE | WS_VSCROLL, 240, 40, 200, 500, hWnd, 0, hInst, 0);*/
         break;
+    case WM_TIMER: {
+        if(wParam = TIMER_ANTICLICK)
+            SendMessageW(progress, PBM_DELTAPOS, -1, 0);
+
+
+        break;
+    }
     case WM_KEYDOWN:
     {
-        WCHAR str[100];
+        
         
         if (wParam == 17)
         {
@@ -152,7 +180,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     }
-    case WM_KEYUP:
+    case WM_MOUSEMOVE: {
+        _snwprintf_s(str, 100, 
+            L"%d %d",
+            GET_X_LPARAM(lParam),
+            GET_Y_LPARAM(lParam));
+
+        SendMessageW(static2, WM_SETTEXT, 100, (LPARAM)str);
+        break;
+    }
+    case WM_LBUTTONDOWN:{
+        click_count += 1;
+        _itow_s(click_count, str, 10);
+        SendMessageW(static3, WM_SETTEXT, 100, (LPARAM)str);
+        
+        break;
+    }
+    case WM_RBUTTONDOWN: {
+        click_count -= 1;
+        _itow_s(click_count, str, 10);
+        SendMessageW(static3, WM_SETTEXT, 100, (LPARAM)str);
+        break;
+    }
+    case WM_LBUTTONUP: {
+        SendMessageW(progress, PBM_STEPIT, 0, 0);
+        break;
+    }
+    case WM_RBUTTONUP:
+        SendMessageW(progress, PBM_DELTAPOS, -1, 0);
+        break;
+    /*case WM_KEYUP:
     {
         WCHAR str[100];
         if (wParam == 17)
@@ -160,7 +217,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             _snwprintf_s(str, 100, L"Right ctrl : %d %u", wParam, (lParam >> 24) & 255);
             SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
         }
-        else if (wParam == 93)
+        else if (lParam == 56)
         {
             _snwprintf_s(str, 100, L"Right alt : %d %u", wParam, (lParam >> 24) & 255);
             SendMessageW(list, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
@@ -171,8 +228,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SendMessageW(list2, LB_ADDSTRING, 100, (LPARAM)L"-----------------------");
         }
         break;
-        break;
-    }
+    }*/
 
     case WM_COMMAND:
         {
